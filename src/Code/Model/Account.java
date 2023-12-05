@@ -28,10 +28,13 @@ public class Account {
     }
 
     public void changeAccountBalance(int amount, boolean chargeOff) throws RemittanceException {
+        String MSG_WRONG_AMOUNT = "неверно введена сумма";
+        String MSG_WRONG_BALANCE = "недостаточный баланс";
+
         if (this.accountBalance - amount < 0)
-            throw new RemittanceException("недостаточный баланс");
+            throw new RemittanceException(MSG_WRONG_BALANCE);
         else if (amount < 0 && !chargeOff)
-            throw new RemittanceException("неверно введена сумма");
+            throw new RemittanceException(MSG_WRONG_AMOUNT);
         else
             this.accountBalance += amount;
     }

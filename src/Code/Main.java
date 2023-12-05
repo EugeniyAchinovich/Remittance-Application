@@ -12,7 +12,7 @@ public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         RemittanceOperations remittanceOperations = new RemittanceOperations();
-        String input = "";
+        String input;
 
         do {
             System.out.print("""
@@ -22,6 +22,7 @@ public class Main {
                     2 - вызов операции вывода списка всех переводов из файла-отчёта
                     Для выхода из программы введите любое другое значение
                     Ввод:\s""");
+
             input = scanner.nextLine();
 
             System.out.print("\u001B[0m");

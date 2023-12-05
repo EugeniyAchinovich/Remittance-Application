@@ -12,6 +12,14 @@ import java.util.regex.Pattern;
 public class RemittanceOperations {
     static final Pattern ACCOUNT_PATTERN = Pattern.compile("\\b(\\w{5}-\\w{5})\\b");
     static final Pattern AMOUNT_PATTERN = Pattern.compile("^-?\\d+$");
+    static final String DATE_PATTERN = "yyyy-MM-dd HH:mm:ss";
+    static final String MSG_FILE_SUCCESS = "File executed successfully: ";
+    static final String MSG_FILES_SUCCESS = "File executed successfully: ";
+    static final String MSG_ERROR_NO_DIRECTORY = "Error: directory empty or not exist";
+    static final String MSG_ERROR_FILE_EXEC = "Error while trying to execute file: ";
+    static final String MSG_LOG_ACCEPT = "Успешно";
+    static final String MSG_LOG_DENY = "Отклонено";
+    static final String MSG_LOG_WRONG_ACCOUNT = "неверные данные аккаунта";
 
     public void parseAll(String sourceDirectoryPath, String targetDirectoryPath) {
         File sourceDirectory = new File(sourceDirectoryPath);
@@ -30,13 +38,13 @@ public class RemittanceOperations {
                 catch (IOException e) {
                     System.err.println(file.getName() + ": " + e.getMessage());
                 }
-                System.out.println("File executed successfully: " + targetFilePath);
+                System.out.println(MSG_FILE_SUCCESS + targetFilePath);
             }
 
-            System.out.println("Files executed successfully");
+            System.out.println(MSG_FILES_SUCCESS);
         }
         else
-            System.err.println("Error: no such directory found");
+            System.err.println(MSG_ERROR_NO_DIRECTORY);
     }
 
     private static String getFileContentByPattern(File file, Pattern pattern) {
@@ -52,7 +60,7 @@ public class RemittanceOperations {
             }
         }
         catch (IOException e) {
-            System.err.println("Error while trying to execute file: " + file.getName() + ": " + e.getMessage());
+            System.err.println(MSG_ERROR_FILE_EXEC + file.getName() + ": " + e.getMessage());
         }
 
         return parsedContent.toString();
@@ -157,27 +165,26 @@ public class RemittanceOperations {
                     int indexTo = findAccountIndexByNumber(accounts, accountNumberTo);
 
                     Date currentDate = new Date();
-                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_PATTERN);
                     String formattedDate = dateFormat.format(currentDate);
 
                     String logMessage =
                             formattedDate
-                            + "| файл: " + file.getName()
-                            + "| перевод c " + accountNumberFrom + " на " + accountNumberTo
-                            + "| сумма: " + amount;
+                            + " | файл: " + file.getName()
+                            + "\t | перевод c " + accountNumberFrom + " на " + accountNumberTo
+                            + "\t | сумма: " + amount;
 
                     try {
                         if (indexFrom > 0 && indexTo > 0) {
                             accounts.get(indexFrom).changeAccountBalance(amount, false);
                             accounts.get(indexTo).changeAccountBalance(amount, true);
-                            logMessage += "| успешно";
+                            logMessage += "\t | " + MSG_LOG_ACCEPT;
                         }
-                        else {
-                            logMessage += "| отклонено: неверно введен аккаунт";
-                        }
+                        else
+                            logMessage += "\t | " + MSG_LOG_DENY + ": " + MSG_LOG_WRONG_ACCOUNT;
                     }
                     catch (RemittanceException e) {
-                        logMessage += "| отклонено: " + e.getMessage();
+                        logMessage += "\t | " + MSG_LOG_DENY + ": " + e.getMessage();
                     }
 
                     writeToLog(logFilePath, logMessage);
@@ -185,9 +192,9 @@ public class RemittanceOperations {
             }
         }
         else {
-            System.out.println("Folder is empty or does not exist.");
+            System.out.println(MSG_ERROR_NO_DIRECTORY);
         }
-
+        writeToLog(logFilePath, "");
         listToFile(accounts, accountsFilePath);
     }
 }
